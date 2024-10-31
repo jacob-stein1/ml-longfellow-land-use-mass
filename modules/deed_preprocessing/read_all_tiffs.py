@@ -7,16 +7,13 @@ spec = importlib.util.spec_from_file_location("google_cloud_ocr", "../google_clo
 google_cloud_ocr_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(google_cloud_ocr_module)
 
-zip_path = 'tiffs.zip'
 output_dir = './outputs'
 
 os.makedirs(output_dir, exist_ok=True)
 
-with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-    zip_ref.extractall('./tiffs')
-
-for root, dirs, files in os.walk('./tiffs'):
+for root, dirs, files in os.walk(r'../../../../mass-sec-state-deeds-data/Books 547-1849/'):
     for file in files:
+        
         if file.endswith('.TIF'):
             tiff_file_path = os.path.join(root, file)
             
