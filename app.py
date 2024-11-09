@@ -3,6 +3,10 @@ from flask_cors import CORS
 import io
 from modules.google_cloud_ocr.google_cloud_ocr import google_cloud_ocr
 from modules.azure_cloud_ocr.azure_cloud_ocr import azure_cloud_ocr
+from modules.deed_preprocessing.spellcheck import correct_spelling
+from modules.deed_preprocessing.preprocessor import preprocess_text
+from modules.last_year.racist_chatgpt_analysis import racist_chatgpt_analysis
+from modules.model_experimentation.bag_of_words_logistic_regression import predict, vectorizer, logistic_model
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -18,11 +22,45 @@ def upload_file():
         return jsonify({'error': 'No selected file'}), 400
 
     ocr_engine = request.form.get('ocr_engine', 'google')
+    analysis_method = request.form.get('analysis_method', 'chatgpt')
 
     try:
         if ocr_engine == 'google':
+
+            # Step 1: Get text using Google OCR
             google_text = google_cloud_ocr(file)
-            return jsonify({'status': 'success', 'ocr_engine': 'google', 'text': google_text}), 200
+
+            # Step 2: Pass text through the spell checker
+            spellchecked_text = correct_spelling(google_text)
+
+            # Step 3: Pass text through the preprocessor
+            processed_text = preprocess_text(spellchecked_text)
+            
+            # Step 4: Choose analysis method
+            if analysis_method == 'chatgpt':
+                analysis_result = racist_chatgpt_analysis(processed_text)
+                return jsonify({
+                    'status': 'success',
+                    'ocr_engine': 'google',
+                    'analysis_method': 'chatgpt',
+                    'original_text': google_text,
+                    'spellchecked_text': spellchecked_text,
+                    'processed_text': processed_text,
+                    'chatgpt_analysis': analysis_result
+                }), 200
+            elif analysis_method == 'logistic_regression':
+                lr_result = predict(processed_text, vectorizer, logistic_model)
+                return jsonify({
+                    'status': 'success',
+                    'ocr_engine': 'google',
+                    'analysis_method': 'logistic_regression',
+                    'original_text': google_text,
+                    'spellchecked_text': spellchecked_text,
+                    'processed_text': processed_text,
+                    'logistic_regression_result': lr_result
+                }), 200
+            else:
+                return jsonify({'error': 'Unsupported analysis method selected'}), 400
         elif ocr_engine == 'azure':
             azure_text = azure_cloud_ocr(file)
             return jsonify({'status': 'success', 'ocr_engine': 'azure', 'text': azure_text}), 200

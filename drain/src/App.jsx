@@ -58,6 +58,15 @@ const App = () => {
                         <option value="azure">Azure OCR</option>
                     </select>
                 </div>
+
+                <div className="analysis-select-container">
+                    <label htmlFor="analysis-select">Select Analysis Method: </label>
+                    <select id="analysis-select" value={analysisMethod} onChange={handleAnalysisChange} className="analysis-select">
+                        <option value="chatgpt">ChatGPT</option>
+                        <option value="logistic_regression">Logistic Regression</option>
+                    </select>
+                </div>
+                
             </header>
         </div>
     );
