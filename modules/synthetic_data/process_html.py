@@ -31,4 +31,3 @@ def retrieve_html():
         final.append(match)
 
     return final
-
