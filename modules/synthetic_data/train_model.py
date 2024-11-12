@@ -86,15 +86,20 @@ print(classification_report(y_test, y_pred))
 
 # Save misclassified texts
 print("Saving misclassified texts...")
-misclassified = X_test[y_test != y_pred].index
-for idx in misclassified:
+
+misclassified_indexes = X_test.index[y_test.values != y_pred]
+
+for idx in misclassified_indexes:
     text = preprocessed_data.loc[idx, 'original_text']
-    is_racist = y_test[idx]
-    predicted = y_pred[idx]
+    is_racist = y_test.loc[idx]
+    predicted = y_pred[X_test.index.get_loc(idx)]
+
     filename = f"{misclassified_dir}/misclassified_{idx}_actual_{is_racist}_pred_{predicted}.txt"
     with open(filename, 'w', encoding='utf-8') as file:
         file.write(text)
-print(f'Saved {len(misclassified)} misclassified texts to {misclassified_dir}')
+
+print(f'Saved {len(misclassified_indexes)} misclassified texts to {misclassified_dir}')
+
 
 # Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
