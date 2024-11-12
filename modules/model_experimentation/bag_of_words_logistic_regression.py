@@ -90,9 +90,3 @@ def predict(processed_text, vectorizer, logistic_model):
     return {
         'is_racist': bool(prediction[0]),
     }
-
-with open('vectorizer.pkl', 'rb') as vec_file:
-    vectorizer = pickle.load(vec_file)
-
-with open('logistic_model.pkl', 'rb') as model_file:
-    logistic_model = pickle.load(model_file)
