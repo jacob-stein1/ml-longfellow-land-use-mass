@@ -15,8 +15,8 @@ sys.path.append(os.path.abspath('../deed_preprocessing'))
 # Import the preprocess_text function
 from preprocessor import preprocess_text
 
+# Import the preprocess_bag_of_words function
 sys.path.append(os.path.abspath('../model_experimentation'))
-
 from bag_of_words_logistic_regression import preprocess_bag_of_words
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -25,10 +25,15 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 non_racist_gt_path = '../model_experimentation/non_racist_deeds_text/'
 racist_gt_path = '../model_experimentation/racist_deeds_text/'
 synthetic_data_path = './synthetic_data'
+misclassified_dir = './misclassified_texts'
 
-# Load existing preprocessed data
+# Ensure the directory for misclassified texts exists
+os.makedirs(misclassified_dir, exist_ok=True)
+
+print("Loading existing preprocessed data...")
 with open('../model_experimentation/preprocessed_deeds.pkl', 'rb') as f:
     preprocessed_data = pickle.load(f)
+print(f"Size of preprocessed data: {preprocessed_data.shape}")
 
 # Function to preprocess and label synthetic data
 def preprocess_synthetic_data(synthetic_data_path):
@@ -43,12 +48,12 @@ def preprocess_synthetic_data(synthetic_data_path):
     
     return synthetic_texts
 
-# Preprocess synthetic data and add to existing data
+print("Preprocessing synthetic data and adding to existing data...")
 synthetic_data = preprocess_synthetic_data(synthetic_data_path)
-print(synthetic_data)
 preprocessed_data = pd.concat([preprocessed_data, pd.DataFrame(synthetic_data)], ignore_index=True)
+print(f"Total data size after adding synthetic data: {preprocessed_data.shape}")
 
-# Create Bag of Words representation
+print("Creating Bag of Words representation...")
 texts = preprocessed_data['original_text']
 preprocessed_text_list = texts.apply(lambda x: {"original_text": x}).tolist()
 bow_df, vectorizer = preprocess_bag_of_words(preprocessed_text_list)
@@ -57,23 +62,39 @@ bow_df, vectorizer = preprocess_bag_of_words(preprocessed_text_list)
 X = bow_df
 y = preprocessed_data['is_racist']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+print(f"Training data size: {X_train.shape}, Test data size: {X_test.shape}")
 
 # Train Logistic Regression model
+print("Training Logistic Regression model...")
 logistic_model = LogisticRegression(max_iter=1000)
 logistic_model.fit(X_train, y_train)
 
 # Save updated model and vectorizer
+print("Saving new vectorizer and logistic model...")
 with open('vectorizer.pkl', 'wb') as vec_file:
     pickle.dump(vectorizer, vec_file)
 with open('logistic_model.pkl', 'wb') as model_file:
     pickle.dump(logistic_model, model_file)
 
 # Evaluate the model
+print("Evaluating model...")
 y_pred = logistic_model.predict(X_test)
 accuracy = accuracy_score(y_test, y_pred)
 print(f"Accuracy: {accuracy:.2f}")
 print("\nClassification Report:")
 print(classification_report(y_test, y_pred))
+
+# Save misclassified texts
+print("Saving misclassified texts...")
+misclassified = X_test[y_test != y_pred].index
+for idx in misclassified:
+    text = preprocessed_data.loc[idx, 'original_text']
+    is_racist = y_test[idx]
+    predicted = y_pred[idx]
+    filename = f"{misclassified_dir}/misclassified_{idx}_actual_{is_racist}_pred_{predicted}.txt"
+    with open(filename, 'w', encoding='utf-8') as file:
+        file.write(text)
+print(f'Saved {len(misclassified)} misclassified texts to {misclassified_dir}')
 
 # Confusion Matrix
 conf_matrix = confusion_matrix(y_test, y_pred)
