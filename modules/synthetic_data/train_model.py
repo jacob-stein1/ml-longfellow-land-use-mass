@@ -48,7 +48,6 @@ def process_ocred_data(ocred_deeds, synthetic_data_path):
     for filename in os.listdir(synthetic_data_path):
         changed = filename[-15:]
         repeats.append(changed)
-    print(repeats)
     ocred_data = []
     for filename in os.listdir(ocred_deeds):
         if filename.endswith('.txt') and filename not in repeats:
@@ -57,8 +56,6 @@ def process_ocred_data(ocred_deeds, synthetic_data_path):
                 processed = preprocess_text(text)
                 processed['is_racist'] = 0 
                 ocred_data.append(processed)
-        else:
-            print(filename)
     
     return ocred_data
 
