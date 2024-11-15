@@ -20,7 +20,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 
 non_racist_gt_path = '../model_experimentation/non_racist_deeds_text/'
 racist_gt_path = '../model_experimentation/racist_deeds_text/'
-synthetic_data_path = './synthetic_data'
+synthetic_data_path = './synthetic_deeds'
 misclassified_dir = './misclassified_texts'
 ocred_deeds = '../deed_preprocessing/outputs/'
 
@@ -43,15 +43,22 @@ def preprocess_synthetic_data(synthetic_data_path):
     
     return synthetic_texts
 
-def process_ocred_data(ocred_deeds):
+def process_ocred_data(ocred_deeds, synthetic_data_path):
+    repeats = []
+    for filename in os.listdir(synthetic_data_path):
+        changed = filename[-15:]
+        repeats.append(changed)
+    print(repeats)
     ocred_data = []
     for filename in os.listdir(ocred_deeds):
-        if filename.endswith('.txt'):
+        if filename.endswith('.txt') and filename not in repeats:
             with open(os.path.join(ocred_deeds, filename), 'r', encoding='utf-8') as f:
                 text = f.read()
                 processed = preprocess_text(text)
                 processed['is_racist'] = 0 
                 ocred_data.append(processed)
+        else:
+            print(filename)
     
     return ocred_data
 
@@ -61,7 +68,7 @@ preprocessed_data = pd.concat([preprocessed_data, pd.DataFrame(synthetic_data)],
 print(f"Total data size after adding synthetic data: {preprocessed_data.shape}")
 
 print("Preprocessing non-racist deeds and adding to existing data...")
-ocred_data = process_ocred_data(ocred_deeds)
+ocred_data = process_ocred_data(ocred_deeds, synthetic_data_path)
 preprocessed_data = pd.concat([preprocessed_data, pd.DataFrame(ocred_data)], ignore_index=True)
 print(f"Total data size after adding ocred deeds: {preprocessed_data.shape}")
 
