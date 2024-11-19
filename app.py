@@ -5,7 +5,7 @@ from modules.google_cloud_ocr.google_cloud_ocr import google_cloud_ocr
 from modules.azure_cloud_ocr.azure_cloud_ocr import azure_cloud_ocr
 from modules.deed_preprocessing.spellcheck import correct_spelling
 from modules.deed_preprocessing.preprocessor import preprocess_text
-from modules.last_year.racist_chatgpt_analysis import racist_chatgpt_analysis
+from modules.openai.racist_chatgpt_analysis import racist_chatgpt_analysis
 from modules.model_experimentation.bag_of_words_logistic_regression import predict, vectorizer, logistic_model
 
 app = Flask(__name__)
