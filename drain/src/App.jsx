@@ -12,6 +12,8 @@ const App = () => {
   const [analysisResult, setAnalysisResult] = useState(null);
 
   const handleFileUpload = async (files) => {
+    setSpellcheckedText("");
+    setAnalysisResult(null);
     setIsLoading(true);
 
     const formData = new FormData();
@@ -76,7 +78,7 @@ const App = () => {
               className="select-input"
             >
               <option value="google">Google OCR</option>
-              <option value="azure">Azure OCR</option>
+              {/* <option value="azure">Azure OCR</option> */}
             </select>
           </div>
 
@@ -93,27 +95,28 @@ const App = () => {
             </select>
           </div>
         </div>
-
-        <div className="results-container">
-          {spellcheckedText && (
-            <div className="result-box">
-              <h3>Spellchecked Text:</h3>
-              <p>{spellcheckedText}</p>
-            </div>
-          )}
-          {analysisResult !== null && (
-            <div className="result-box">
-              <h3>Analysis Result:</h3>
-              <p>
-                {analysisResult ? (
-                  <span className="racist-label">Racist Content Detected</span>
-                ) : (
-                  <span className="non-racist-label">No Racist Content</span>
-                )}
-              </p>
-            </div>
-          )}
-        </div>
+        {(spellcheckedText || analysisResult) && (
+          <div className="results-container">
+            {spellcheckedText && (
+              <div className="result-box">
+                <h3>Spellchecked Text:</h3>
+                <p>{spellcheckedText}</p>
+              </div>
+            )}
+            {analysisResult !== null && (
+              <div className="result-box">
+                <h3>Analysis Result:</h3>
+                <p>
+                  {analysisResult ? (
+                    <span className="racist-label">Racist Content Detected</span>
+                  ) : (
+                    <span className="non-racist-label">No Racist Content</span>
+                  )}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </header>
     </div>
   );

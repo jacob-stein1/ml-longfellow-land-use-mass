@@ -82,9 +82,7 @@ if __name__ == "__main__":
 
 # Function to make predictions based on the trained model
 def predict(processed_text, vectorizer, logistic_model):
-    
-    bow_text = vectorizer.transform([processed_text])
-    
+    bow_text = vectorizer.transform([processed_text["original_text"]])
     prediction = logistic_model.predict(bow_text)
     
     return {
