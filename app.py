@@ -1,15 +1,21 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import io
+import pickle
 from modules.google_cloud_ocr.google_cloud_ocr import google_cloud_ocr
 from modules.azure_cloud_ocr.azure_cloud_ocr import azure_cloud_ocr
 from modules.deed_preprocessing.spellcheck import correct_spelling
 from modules.deed_preprocessing.preprocessor import preprocess_text
 from modules.openai.racist_chatgpt_analysis import racist_chatgpt_analysis
-from modules.model_experimentation.bag_of_words_logistic_regression import predict, vectorizer, logistic_model
+from modules.model_experimentation.bag_of_words_logistic_regression import predict
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+with open('modules/model_experimentation/vectorizer.pkl', 'rb') as vec_file:
+    vectorizer = pickle.load(vec_file)
+
+with open('modules/model_experimentation/logistic_model.pkl', 'rb') as model_file:
+    logistic_model = pickle.load(model_file)
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
@@ -38,7 +44,8 @@ def upload_file():
             
             # Step 4: Choose analysis method
             if analysis_method == 'chatgpt':
-                analysis_result = racist_chatgpt_analysis(processed_text)
+                # analysis_result = racist_chatgpt_analysis(processed_text)
+                analysis_result = False
                 return jsonify({
                     'status': 'success',
                     'ocr_engine': 'google',
@@ -46,7 +53,7 @@ def upload_file():
                     'original_text': google_text,
                     'spellchecked_text': spellchecked_text,
                     'processed_text': processed_text,
-                    'chatgpt_analysis': analysis_result
+                    'result': analysis_result
                 }), 200
             elif analysis_method == 'logistic_regression':
                 lr_result = predict(processed_text, vectorizer, logistic_model)
@@ -57,7 +64,7 @@ def upload_file():
                     'original_text': google_text,
                     'spellchecked_text': spellchecked_text,
                     'processed_text': processed_text,
-                    'logistic_regression_result': lr_result
+                    'result': lr_result
                 }), 200
             else:
                 return jsonify({'error': 'Unsupported analysis method selected'}), 400
