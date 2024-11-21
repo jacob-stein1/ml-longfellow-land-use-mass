@@ -44,8 +44,7 @@ def upload_file():
             
             # Step 4: Choose analysis method
             if analysis_method == 'chatgpt':
-                # analysis_result = racist_chatgpt_analysis(processed_text)
-                analysis_result = False
+                analysis_result = racist_chatgpt_analysis(processed_text['original_text'])
                 return jsonify({
                     'status': 'success',
                     'ocr_engine': 'google',

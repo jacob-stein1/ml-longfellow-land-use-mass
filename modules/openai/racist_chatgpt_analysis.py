@@ -20,6 +20,7 @@ def racist_chatgpt_analysis(text):
                 {"role": "user", "content": text}
             ]
         )
+        print(response.choices[0].message.content)
         if response.choices[0].message.content.strip() == "Yes":
             return True
         else:
