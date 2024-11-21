@@ -57,7 +57,6 @@ const App = () => {
 
   return (
     <div className="App">
-      {isLoading && <Loader />}
       <Banner />
       <header className="App-header">
         <h1>
@@ -66,7 +65,7 @@ const App = () => {
         <h3>OCR File Upload</h3>
         <p>Convert your files to text using OCR</p>
 
-        <DragDropArea onFileUpload={handleFileUpload} />
+        <DragDropArea onFileUpload={handleFileUpload} isLoading={isLoading} />
 
         <div className="selector-container">
           <div className="select-box">
@@ -108,7 +107,9 @@ const App = () => {
                 <h3>Analysis Result:</h3>
                 <p>
                   {analysisResult ? (
-                    <span className="racist-label">Racist Content Detected</span>
+                    <span className="racist-label">
+                      Racist Content Detected
+                    </span>
                   ) : (
                     <span className="non-racist-label">No Racist Content</span>
                   )}

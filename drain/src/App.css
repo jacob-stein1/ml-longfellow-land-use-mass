@@ -8,10 +8,8 @@ html {
   text-align: center;
   font-family: "Arial", sans-serif;
   margin: auto;
-  padding-top: 160px;
   box-sizing: border-box;
   color: #333;
-  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -199,4 +197,3 @@ html {
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-
