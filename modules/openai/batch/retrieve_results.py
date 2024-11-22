@@ -12,11 +12,12 @@ def retrieve_results(output_file_id, output_path):
 
     file_response = client.files.content(output_file_id)
 
+    # Write the binary content to the output file
     with open(output_path, "wb") as out_file:
-        out_file.write(file_response)
+        out_file.write(file_response.read())  
 
     print(f"Batch results downloaded to {output_path}")
 
 if __name__ == "__main__":
-    output_file_id = "your_output_file_id_here" # output file id here obtained from check_batch_status.py
+    output_file_id = ""  # Replace with your actual output file ID
     retrieve_results(output_file_id, "batch_output.jsonl")
