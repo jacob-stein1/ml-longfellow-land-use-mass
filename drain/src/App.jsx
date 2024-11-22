@@ -35,7 +35,6 @@ const App = () => {
       }
 
       const data = await response.json();
-      console.log("Response from server:", data);
 
       // Update state with API response
       setSpellcheckedText(data.spellchecked_text);

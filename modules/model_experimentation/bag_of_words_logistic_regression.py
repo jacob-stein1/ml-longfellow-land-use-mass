@@ -84,7 +84,6 @@ if __name__ == "__main__":
 def predict(processed_text, vectorizer, logistic_model):
     bow_text = vectorizer.transform([processed_text["original_text"]])
     prediction = logistic_model.predict(bow_text)
-    
     return {
         'is_racist': bool(prediction[0]),
     }

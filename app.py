@@ -55,7 +55,7 @@ def upload_file():
                     'result': analysis_result
                 }), 200
             elif analysis_method == 'logistic_regression':
-                lr_result = predict(processed_text, vectorizer, logistic_model)
+                lr_result = predict(processed_text, vectorizer, logistic_model)['is_racist']
                 return jsonify({
                     'status': 'success',
                     'ocr_engine': 'google',
