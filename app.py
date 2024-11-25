@@ -41,8 +41,14 @@ def upload_file():
 
             # Step 3: Pass text through the preprocessor
             processed_text = preprocess_text(spellchecked_text)
+
+            # Step 4: Get the names and locations
+            extracted_info = {
+            "names": processed_text.get("names", []),
+            "locations": processed_text.get("locations", [])
+            }
             
-            # Step 4: Choose analysis method
+            # Step 5: Choose analysis method
             if analysis_method == 'chatgpt':
                 analysis_result = racist_chatgpt_analysis(processed_text['original_text'])
                 return jsonify({
@@ -52,6 +58,7 @@ def upload_file():
                     'original_text': google_text,
                     'spellchecked_text': spellchecked_text,
                     'processed_text': processed_text,
+                    'extracted_info': extracted_info,
                     'result': analysis_result
                 }), 200
             elif analysis_method == 'logistic_regression':
@@ -63,6 +70,7 @@ def upload_file():
                     'original_text': google_text,
                     'spellchecked_text': spellchecked_text,
                     'processed_text': processed_text,
+                    'extracted_info': extracted_info,
                     'result': lr_result
                 }), 200
             else:

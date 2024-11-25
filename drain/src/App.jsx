@@ -10,10 +10,12 @@ const App = () => {
   const [analysisMethod, setAnalysisMethod] = useState("logistic_regression");
   const [spellcheckedText, setSpellcheckedText] = useState("");
   const [analysisResult, setAnalysisResult] = useState(null);
+  const [extractedInfo, setExtractedInfo] = useState({ names: [], locations: [] });
 
   const handleFileUpload = async (files) => {
     setSpellcheckedText("");
     setAnalysisResult(null);
+    setExtractedInfo({ names: [], locations: [] });
     setIsLoading(true);
 
     const formData = new FormData();
@@ -39,6 +41,7 @@ const App = () => {
       // Update state with API response
       setSpellcheckedText(data.spellchecked_text);
       setAnalysisResult(data.result);
+      setExtractedInfo(data.extracted_info || { names: [], locations: [] });
     } catch (error) {
       console.error("Error during fetch:", error);
     } finally {
@@ -115,11 +118,36 @@ const App = () => {
                 </p>
               </div>
             )}
+           {(extractedInfo.names.length > 0 || extractedInfo.locations.length > 0) && (
+              <div className="results-container">
+                {extractedInfo.names.length > 0 && (
+                  <div className="result-box">
+                    <h3>Extracted Names:</h3>
+                    <ul>
+                      {extractedInfo.names.map((name, index) => (
+                        <li key={index}>{name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {extractedInfo.locations.length > 0 && (
+                  <div className="result-box">
+                    <h3>Extracted Locations:</h3>
+                    <ul>
+                      {extractedInfo.locations.map((location, index) => (
+                        <li key={index}>{location}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </header>
     </div>
   );
 };
+
 
 export default App;
