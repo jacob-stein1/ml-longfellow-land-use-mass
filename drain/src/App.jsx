@@ -2,46 +2,96 @@ import { useState } from "react";
 import DragDropArea from "./components/DragDropArea";
 import "./App.css";
 import Banner from "./components/Banner";
-import Loader from "./Loader";
+
+const TiffResult = ({
+  fileName,
+  spellcheckedText,
+  analysisResult,
+  extractedInfo,
+}) => (
+  <div className="results-container">
+    <h3>{fileName}</h3>
+    <div className="result-box">
+      <h4>Spellchecked Text:</h4>
+      <p>{spellcheckedText}</p>
+    </div>
+    <div className="result-box">
+      <h4>Analysis Result:</h4>
+      <p>
+        {analysisResult ? (
+          <span className="racist-label">Racist Content Detected</span>
+        ) : (
+          <span className="non-racist-label">No Racist Content</span>
+        )}
+      </p>
+    </div>
+    {(extractedInfo.names.length > 0 || extractedInfo.locations.length > 0) && (
+      <div className="result-box">
+        <h4>Extracted Information:</h4>
+        {extractedInfo.names.length > 0 && (
+          <div>
+            <h5>Names:</h5>
+            <ul>
+              {extractedInfo.names.map((name, index) => (
+                <li key={index}>{name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+        {extractedInfo.locations.length > 0 && (
+          <div>
+            <h5>Locations:</h5>
+            <ul>
+              {extractedInfo.locations.map((location, index) => (
+                <li key={index}>{location}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+);
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [ocrEngine, setOcrEngine] = useState("google");
   const [analysisMethod, setAnalysisMethod] = useState("logistic_regression");
-  const [spellcheckedText, setSpellcheckedText] = useState("");
-  const [analysisResult, setAnalysisResult] = useState(null);
-  const [extractedInfo, setExtractedInfo] = useState({ names: [], locations: [] });
+  const [results, setResults] = useState([]);
 
   const handleFileUpload = async (files) => {
-    setSpellcheckedText("");
-    setAnalysisResult(null);
-    setExtractedInfo({ names: [], locations: [] });
+    setResults([]);
     setIsLoading(true);
 
-    const formData = new FormData();
-    files.forEach((file) => {
-      formData.append("file", file);
-    });
-
-    formData.append("ocr_engine", ocrEngine);
-    formData.append("analysis_method", analysisMethod);
-
     try {
-      const response = await fetch("http://127.0.0.1:5000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const newResults = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("ocr_engine", ocrEngine);
+        formData.append("analysis_method", analysisMethod);
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch("http://127.0.0.1:5000/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        console.log(response);
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        newResults.push({
+          fileName: file.name,
+          spellcheckedText: data.spellchecked_text || "No text available",
+          analysisResult: data.result || false,
+          extractedInfo: data.extracted_info || { names: [], locations: [] },
+        });
       }
-
-      const data = await response.json();
-
-      // Update state with API response
-      setSpellcheckedText(data.spellchecked_text);
-      setAnalysisResult(data.result);
-      setExtractedInfo(data.extracted_info || { names: [], locations: [] });
+      setResults(newResults);
     } catch (error) {
       console.error("Error during fetch:", error);
     } finally {
@@ -79,7 +129,6 @@ const App = () => {
               className="select-input"
             >
               <option value="google">Google OCR</option>
-              {/* <option value="azure">Azure OCR</option> */}
             </select>
           </div>
 
@@ -96,58 +145,22 @@ const App = () => {
             </select>
           </div>
         </div>
-        {(spellcheckedText || analysisResult) && (
-          <div className="results-container">
-            {spellcheckedText && (
-              <div className="result-box">
-                <h3>Spellchecked Text:</h3>
-                <p>{spellcheckedText}</p>
-              </div>
-            )}
-            {analysisResult !== null && (
-              <div className="result-box">
-                <h3>Analysis Result:</h3>
-                <p>
-                  {analysisResult ? (
-                    <span className="racist-label">
-                      Racist Content Detected
-                    </span>
-                  ) : (
-                    <span className="non-racist-label">No Racist Content</span>
-                  )}
-                </p>
-              </div>
-            )}
-           {(extractedInfo.names.length > 0 || extractedInfo.locations.length > 0) && (
-              <div className="results-container">
-                {extractedInfo.names.length > 0 && (
-                  <div className="result-box">
-                    <h3>Extracted Names:</h3>
-                    <ul>
-                      {extractedInfo.names.map((name, index) => (
-                        <li key={index}>{name}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                {extractedInfo.locations.length > 0 && (
-                  <div className="result-box">
-                    <h3>Extracted Locations:</h3>
-                    <ul>
-                      {extractedInfo.locations.map((location, index) => (
-                        <li key={index}>{location}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        {isLoading ? (
+          <></>
+        ) : (
+          results.map((result, index) => (
+            <TiffResult
+              key={index}
+              fileName={result.fileName}
+              spellcheckedText={result.spellcheckedText}
+              analysisResult={result.analysisResult}
+              extractedInfo={result.extractedInfo}
+            />
+          ))
         )}
       </header>
     </div>
   );
 };
-
 
 export default App;
