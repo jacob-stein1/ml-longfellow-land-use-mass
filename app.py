@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import pickle
 from modules.google_cloud_ocr.google_cloud_ocr import google_cloud_ocr
@@ -7,9 +7,12 @@ from modules.deed_preprocessing.spellcheck import correct_spelling
 from modules.deed_preprocessing.preprocessor import preprocess_text
 from modules.openai.racist_chatgpt_analysis import racist_chatgpt_analysis
 from modules.model_experimentation.bag_of_words_logistic_regression import predict
+import pandas as pd
+import xlsxwriter
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True, origins="*")
 
 with open('modules/model_experimentation/vectorizer.pkl', 'rb') as vec_file:
     vectorizer = pickle.load(vec_file)
@@ -32,7 +35,6 @@ def upload_file():
 
     try:
         if ocr_engine == 'google':
-
             # Step 1: Get text using Google OCR
             google_text = google_cloud_ocr(file)
 
@@ -44,8 +46,8 @@ def upload_file():
 
             # Step 4: Get the names and locations
             extracted_info = {
-            "names": processed_text.get("names", []),
-            "locations": processed_text.get("locations", [])
+                "names": processed_text.get("names", []),
+                "locations": processed_text.get("locations", [])
             }
             
             # Step 5: Choose analysis method
@@ -80,6 +82,22 @@ def upload_file():
             return jsonify({'status': 'success', 'ocr_engine': 'azure', 'text': azure_text}), 200
         else:
             return jsonify({'error': 'Unsupported OCR engine selected'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/download_excel', methods=['POST'])
+def download_excel():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        df = pd.DataFrame(data)
+        excel_path = 'output.xlsx'
+        with pd.ExcelWriter(excel_path, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+
+        return send_file(excel_path, as_attachment=True, download_name='analysis_results.xlsx')
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

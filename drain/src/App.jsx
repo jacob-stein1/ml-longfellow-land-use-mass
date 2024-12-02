@@ -99,6 +99,29 @@ const App = () => {
     }
   };
 
+  const handleDownloadExcel = async () => {
+    const response = await fetch('http://127.0.0.1:5000/api/download_excel', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(results)
+    });
+
+    if (response.ok) {
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = 'analysis_results.xlsx';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } else {
+      console.error('Failed to download file:', await response.text());
+    }
+};
+
   const handleOcrChange = (event) => {
     setOcrEngine(event.target.value);
   };
@@ -146,17 +169,22 @@ const App = () => {
           </div>
         </div>
         {isLoading ? (
-          <></>
+          <p>Loading...</p>
         ) : (
-          results.map((result, index) => (
-            <TiffResult
-              key={index}
-              fileName={result.fileName}
-              spellcheckedText={result.spellcheckedText}
-              analysisResult={result.analysisResult}
-              extractedInfo={result.extractedInfo}
-            />
-          ))
+          <>
+            {results.map((result, index) => (
+              <TiffResult
+                key={index}
+                fileName={result.fileName}
+                spellcheckedText={result.spellcheckedText}
+                analysisResult={result.analysisResult}
+                extractedInfo={result.extractedInfo}
+              />
+            ))}
+            {results.length > 0 && (
+              <button onClick={handleDownloadExcel} className="download-button">Download Results as Excel</button>
+            )}
+          </>
         )}
       </header>
     </div>
