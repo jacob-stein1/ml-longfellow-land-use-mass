@@ -131,10 +131,15 @@ const App = () => {
   };
 
   const handleFileChange = (event) => {
-    const selectedFile = results.find(
-      (result) => result.fileName === event.target.value
-    );
-    setSelectedResult(selectedFile);
+    const value = event.target.value;
+    if (value === "all") {
+      setSelectedResult("all");
+    } else {
+      const selectedFile = results.find(
+        result => result.fileName === value
+      );
+      setSelectedResult(selectedFile);
+    }
   };
 
   return (
@@ -184,6 +189,7 @@ const App = () => {
                 onChange={handleFileChange}
                 className="select-input"
               >
+                <option value="all">View All</option>
                 {results.map((result) => (
                   <option key={result.fileName} value={result.fileName}>
                     {result.fileName}
@@ -197,14 +203,24 @@ const App = () => {
           </div>
         )}
 
-        {selectedResult && (
-          <TiffResult
-            fileName={selectedResult.fileName}
-            spellcheckedText={selectedResult.spellcheckedText}
-            analysisResult={selectedResult.analysisResult}
-            extractedInfo={selectedResult.extractedInfo}
-          />
-        )}
+        {selectedResult === "all"
+          ? results.map((result) => (
+              <TiffResult
+                key={result.fileName}
+                fileName={result.fileName}
+                spellcheckedText={result.spellcheckedText}
+                analysisResult={result.analysisResult}
+                extractedInfo={result.extractedInfo}
+              />
+            ))
+          : selectedResult && (
+              <TiffResult
+                fileName={selectedResult.fileName}
+                spellcheckedText={selectedResult.spellcheckedText}
+                analysisResult={selectedResult.analysisResult}
+                extractedInfo={selectedResult.extractedInfo}
+              />
+            )}
       </header>
     </div>
   );
