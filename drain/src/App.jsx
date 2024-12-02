@@ -58,6 +58,7 @@ const App = () => {
   const [ocrEngine, setOcrEngine] = useState("google");
   const [analysisMethod, setAnalysisMethod] = useState("logistic_regression");
   const [results, setResults] = useState([]);
+  const [selectedResult, setSelectedResult] = useState(null);
 
   const handleFileUpload = async (files) => {
     setResults([]);
@@ -76,8 +77,6 @@ const App = () => {
           body: formData,
         });
 
-        console.log(response);
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -92,6 +91,7 @@ const App = () => {
         });
       }
       setResults(newResults);
+      setSelectedResult(newResults[0]);
     } catch (error) {
       console.error("Error during fetch:", error);
     } finally {
@@ -100,27 +100,27 @@ const App = () => {
   };
 
   const handleDownloadExcel = async () => {
-    const response = await fetch('http://127.0.0.1:5000/api/download_excel', {
-      method: 'POST',
+    const response = await fetch("http://127.0.0.1:5000/api/download_excel", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(results)
+      body: JSON.stringify(results),
     });
 
     if (response.ok) {
       const blob = await response.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
-      link.download = 'analysis_results.xlsx';
+      link.download = "analysis_results.xlsx";
       document.body.appendChild(link);
       link.click();
       link.remove();
     } else {
-      console.error('Failed to download file:', await response.text());
+      console.error("Failed to download file:", await response.text());
     }
-};
+  };
 
   const handleOcrChange = (event) => {
     setOcrEngine(event.target.value);
@@ -128,6 +128,13 @@ const App = () => {
 
   const handleAnalysisChange = (event) => {
     setAnalysisMethod(event.target.value);
+  };
+
+  const handleFileChange = (event) => {
+    const selectedFile = results.find(
+      (result) => result.fileName === event.target.value
+    );
+    setSelectedResult(selectedFile);
   };
 
   return (
@@ -168,23 +175,36 @@ const App = () => {
             </select>
           </div>
         </div>
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <>
-            {results.map((result, index) => (
-              <TiffResult
-                key={index}
-                fileName={result.fileName}
-                spellcheckedText={result.spellcheckedText}
-                analysisResult={result.analysisResult}
-                extractedInfo={result.extractedInfo}
-              />
-            ))}
-            {results.length > 0 && (
-              <button onClick={handleDownloadExcel} className="download-button">Download Results as Excel</button>
-            )}
-          </>
+
+        {results.length > 0 && (
+          <div className="file-dropdown-container">
+            <div className="select-box">
+              <label htmlFor="file-select">Select File: </label>
+              <select
+                id="file-select"
+                onChange={handleFileChange}
+                className="select-input"
+              >
+                {results.map((result) => (
+                  <option key={result.fileName} value={result.fileName}>
+                    {result.fileName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button onClick={handleDownloadExcel} className="download-button">
+              Download Results as Excel
+            </button>
+          </div>
+        )}
+
+        {selectedResult && (
+          <TiffResult
+            fileName={selectedResult.fileName}
+            spellcheckedText={selectedResult.spellcheckedText}
+            analysisResult={selectedResult.analysisResult}
+            extractedInfo={selectedResult.extractedInfo}
+          />
         )}
       </header>
     </div>
