@@ -179,7 +179,6 @@ const App = () => {
         {results.length > 0 && (
           <div className="file-dropdown-container">
             <div className="select-box">
-              <label htmlFor="file-select">Select File: </label>
               <select
                 id="file-select"
                 onChange={handleFileChange}
