@@ -59,6 +59,7 @@ const App = () => {
   const [analysisMethod, setAnalysisMethod] = useState("logistic_regression");
   const [results, setResults] = useState([]);
   const [selectedResult, setSelectedResult] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleFileUpload = async (files) => {
     setResults([]);
@@ -91,7 +92,7 @@ const App = () => {
         });
       }
       setResults(newResults);
-      setSelectedResult(newResults[0]);
+      setSelectedResult("all");
     } catch (error) {
       console.error("Error during fetch:", error);
     } finally {
@@ -130,14 +131,25 @@ const App = () => {
     setAnalysisMethod(event.target.value);
   };
 
-  const handleFileChange = (event) => {
+const handleSearchConfirm = () => {
+    if (!searchTerm.trim()) {
+      setSelectedResult("all");
+    } else {
+      const foundResult = results.find(result => result.fileName.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (foundResult) {
+        setSelectedResult(foundResult);
+      } else {
+        alert("File not found!");
+      }
+    }
+  };
+
+  const handleDropdownChange = (event) => {
     const value = event.target.value;
     if (value === "all") {
       setSelectedResult("all");
     } else {
-      const selectedFile = results.find(
-        result => result.fileName === value
-      );
+      const selectedFile = results.find(result => result.fileName === value);
       setSelectedResult(selectedFile);
     }
   };
@@ -154,6 +166,9 @@ const App = () => {
 
         <DragDropArea onFileUpload={handleFileUpload} isLoading={isLoading} />
 
+        
+        
+        
         <div className="selector-container">
           <div className="select-box">
             <label htmlFor="ocr-select">Select OCR Engine: </label>
@@ -182,11 +197,24 @@ const App = () => {
         </div>
 
         {results.length > 0 && (
+          <div className="search-container">
+            <input
+              type="text"
+              placeholder="Search file names..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <button onClick={handleSearchConfirm} className="go-button">Go</button>
+          </div>
+        )}
+
+        {results.length > 0 && (
           <div className="file-dropdown-container">
             <div className="select-box">
               <select
                 id="file-select"
-                onChange={handleFileChange}
+                onChange={handleDropdownChange}
                 className="select-input"
               >
                 <option value="all">View All</option>
