@@ -51,3 +51,7 @@ Guide to OpenAI batch api --> https://platform.openai.com/docs/guides/batch
 
    2. List Batches (list_batches.py)
       1. View all batches created, including their status and metadata.
+
+## Consolidated script that combines all the functionalities (Except helpers)
+
+   1. batch_processing.py
