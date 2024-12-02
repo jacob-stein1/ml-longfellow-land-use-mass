@@ -15,7 +15,8 @@ def racist_chatgpt_analysis(text):
                     "role": "system",
                     "content": "You are a helpful assistant designed to check if there's any racial contents. \
                                 Please review this document for any racial or discriminatory expressions. \
-                                If yes, return 'Yes', if there's none, please return 'No racial content found'."
+                                If yes, return 'Yes', if there's none, please return 'No racial content found'. \
+                                If there is any doubt or ambiguity, assume the text contains racial content and respond 'Yes'."
                 },
                 {"role": "user", "content": text}
             ]
