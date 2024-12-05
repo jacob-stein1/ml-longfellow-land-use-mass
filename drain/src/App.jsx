@@ -25,33 +25,40 @@ const TiffResult = ({
         )}
       </p>
     </div>
-    {(extractedInfo.names.length > 0 || extractedInfo.locations.length > 0) && (
-      <div className="result-box">
-        <h4>Extracted Information:</h4>
-        {extractedInfo.names.length > 0 && (
-          <div>
-            <h5>Names:</h5>
-            <ul>
-              {extractedInfo.names.map((name, index) => (
-                <li key={index}>{name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {extractedInfo.locations.length > 0 && (
-          <div>
-            <h5>Locations:</h5>
-            <ul>
-              {extractedInfo.locations.map((location, index) => (
-                <li key={index}>{location}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+    <div className="result-box">
+      <h4>Extracted Information:</h4>
+      {extractedInfo.names.length > 0 && (
+        <div>
+          <h5>Names:</h5>
+          <ul>
+            {extractedInfo.names.map((name, index) => (
+              <li key={index}>{name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {extractedInfo.locations.length > 0 && (
+        <div>
+          <h5>Locations:</h5>
+          <ul>
+            {extractedInfo.locations.map((location, index) => (
+              <li key={index}>{location}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      <div>
+        <h5>Book Numbers:</h5>
+        <p>{extractedInfo.book_numbers && extractedInfo.book_numbers.length > 0 ? extractedInfo.book_numbers.join(', ') : "None"}</p>
       </div>
-    )}
+      <div>
+        <h5>Page Numbers:</h5>
+        <p>{extractedInfo.page_numbers && extractedInfo.page_numbers.length > 0 ? extractedInfo.page_numbers.join(', ') : "None"}</p>
+      </div>
+    </div>
   </div>
 );
+
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -165,9 +172,6 @@ const handleSearchConfirm = () => {
         <p>Convert your files to text using OCR</p>
 
         <DragDropArea onFileUpload={handleFileUpload} isLoading={isLoading} />
-
-        
-        
         
         <div className="selector-container">
           <div className="select-box">
