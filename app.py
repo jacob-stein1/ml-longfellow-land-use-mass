@@ -9,6 +9,7 @@ from modules.openai.racist_chatgpt_analysis import racist_chatgpt_analysis
 from modules.model_experimentation.bag_of_words_logistic_regression import predict
 import pandas as pd
 import xlsxwriter
+import re
 
 app = Flask(__name__)
 # CORS(app, resources={r"/*": {"origins": "*"}})
@@ -19,6 +20,12 @@ with open('modules/model_experimentation/vectorizer.pkl', 'rb') as vec_file:
 
 with open('modules/model_experimentation/logistic_model.pkl', 'rb') as model_file:
     logistic_model = pickle.load(model_file)
+
+# Helper to look for the book and page numbers
+def extract_book_and_page(text):
+    book_numbers = re.findall(r"book\s+(\d+)", text, re.IGNORECASE)
+    page_numbers = re.findall(r"page\s+(\d+)", text, re.IGNORECASE)
+    return book_numbers, page_numbers
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
@@ -44,10 +51,15 @@ def upload_file():
             # Step 3: Pass text through the preprocessor
             processed_text = preprocess_text(spellchecked_text)
 
+            # Extract book and page numbers right after spellchecking
+            book_numbers, page_numbers = extract_book_and_page(spellchecked_text)
+
             # Step 4: Get the names and locations
             extracted_info = {
                 "names": processed_text.get("names", []),
-                "locations": processed_text.get("locations", [])
+                "locations": processed_text.get("locations", []),
+                "book_numbers": book_numbers,  
+                "page_numbers": page_numbers
             }
             
             # Step 5: Choose analysis method
