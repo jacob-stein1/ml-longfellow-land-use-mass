@@ -87,6 +87,7 @@ const App = () => {
         formData.append("ocr_engine", ocrEngine);
         formData.append("analysis_method", analysisMethod);
 
+        // Reads from HuggingFace backend
         const response = await fetch(
           "https://spark-ds549-f24-racist-deeds.hf.space/api/upload",
           {
