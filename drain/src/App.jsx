@@ -49,16 +49,23 @@ const TiffResult = ({
       )}
       <div>
         <h5>Book Numbers:</h5>
-        <p>{extractedInfo.book_numbers && extractedInfo.book_numbers.length > 0 ? extractedInfo.book_numbers.join(', ') : "None"}</p>
+        <p>
+          {extractedInfo.book_numbers && extractedInfo.book_numbers.length > 0
+            ? extractedInfo.book_numbers.join(", ")
+            : "None"}
+        </p>
       </div>
       <div>
         <h5>Page Numbers:</h5>
-        <p>{extractedInfo.page_numbers && extractedInfo.page_numbers.length > 0 ? extractedInfo.page_numbers.join(', ') : "None"}</p>
+        <p>
+          {extractedInfo.page_numbers && extractedInfo.page_numbers.length > 0
+            ? extractedInfo.page_numbers.join(", ")
+            : "None"}
+        </p>
       </div>
     </div>
   </div>
 );
-
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,10 +87,13 @@ const App = () => {
         formData.append("ocr_engine", ocrEngine);
         formData.append("analysis_method", analysisMethod);
 
-        const response = await fetch("http://127.0.0.1:5000/api/upload", {
-          method: "POST",
-          body: formData,
-        });
+        const response = await fetch(
+          "https://spark-ds549-f24-racist-deeds.hf.space/api/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -108,13 +118,16 @@ const App = () => {
   };
 
   const handleDownloadExcel = async () => {
-    const response = await fetch("http://127.0.0.1:5000/api/download_excel", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(results),
-    });
+    const response = await fetch(
+      "https://spark-ds549-f24-racist-deeds.hf.space/api/download_excel",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(results),
+      }
+    );
 
     if (response.ok) {
       const blob = await response.blob();
@@ -138,11 +151,13 @@ const App = () => {
     setAnalysisMethod(event.target.value);
   };
 
-const handleSearchConfirm = () => {
+  const handleSearchConfirm = () => {
     if (!searchTerm.trim()) {
       setSelectedResult("all");
     } else {
-      const foundResult = results.find(result => result.fileName.toLowerCase().includes(searchTerm.toLowerCase()));
+      const foundResult = results.find((result) =>
+        result.fileName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
       if (foundResult) {
         setSelectedResult(foundResult);
       } else {
@@ -156,7 +171,7 @@ const handleSearchConfirm = () => {
     if (value === "all") {
       setSelectedResult("all");
     } else {
-      const selectedFile = results.find(result => result.fileName === value);
+      const selectedFile = results.find((result) => result.fileName === value);
       setSelectedResult(selectedFile);
     }
   };
@@ -172,7 +187,7 @@ const handleSearchConfirm = () => {
         <p>Convert your files to text using OCR</p>
 
         <DragDropArea onFileUpload={handleFileUpload} isLoading={isLoading} />
-        
+
         <div className="selector-container">
           <div className="select-box">
             <label htmlFor="ocr-select">Select OCR Engine: </label>
@@ -209,7 +224,9 @@ const handleSearchConfirm = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            <button onClick={handleSearchConfirm} className="go-button">Go</button>
+            <button onClick={handleSearchConfirm} className="go-button">
+              Go
+            </button>
           </div>
         )}
 
