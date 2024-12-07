@@ -3,6 +3,28 @@ import DragDropArea from "./components/DragDropArea";
 import "./App.css";
 import Banner from "./components/Banner";
 
+const bigotryTerms = new Set([
+  "irishman", "greek", "portugese", "mulatto", "quadroon", "chinaman", "jap", "hebrew", 
+  "pole", "french canadian", "canadien", "quebecois", "arab", "turk", "frenchman", "german", 
+  "spaniard", "slav", "russian", "persian", "korean", "negro", "colored", "polander", "polish", 
+  "italian", "african", "hindu", "japanese", "chinese", "catholic", "jew", "jewish", "white", 
+  "aryan", "caucasian", "race", "semetic", "shall not be re-sold", "shall not be resold", 
+  "shall not be sold"
+].map(word => word.toLowerCase())); 
+
+const highlightText = (text, shouldHighlight) => {
+  console.log('Should highlight:', shouldHighlight);  
+  if (!shouldHighlight) {
+    return text;
+  }
+  const words = text.split(/(\s+)/);
+  return words.map((word, index) => (
+    bigotryTerms.has(word.toLowerCase()) ?
+    <span key={index} style={{ backgroundColor: 'yellow' }}>{word}</span> :
+    word
+  ));
+};
+
 const TiffResult = ({
   fileName,
   spellcheckedText,
@@ -13,7 +35,7 @@ const TiffResult = ({
     <h3>{fileName}</h3>
     <div className="result-box">
       <h4>Spellchecked Text:</h4>
-      <p>{spellcheckedText}</p>
+      <p>{highlightText(spellcheckedText, analysisResult)}</p>
     </div>
     <div className="result-box">
       <h4>Analysis Result:</h4>
